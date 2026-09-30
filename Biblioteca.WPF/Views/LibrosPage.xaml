@@ -1,0 +1,122 @@
+<Page x:Class="Biblioteca.WPF.Views.LibrosPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Libros"
+      ScrollViewer.CanContentScroll="False">
+    <Grid Margin="32,20,32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Encabezado -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Libros" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="Registra, busca y gestiona los libros de la biblioteca. La eliminación es lógica (Activo = 0)."
+                       Style="{StaticResource PageSubtitle}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Lista de libros -->
+            <ui:Card Grid.Column="0" Padding="16" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:DropDownButton x:Name="btnCriterio" Grid.Column="0" Content="Por título" Margin="0,0,8,0">
+                            <ui:DropDownButton.Flyout>
+                                <ContextMenu>
+                                    <MenuItem Header="Por título" Click="criterioTitulo_Click" />
+                                    <MenuItem Header="Por autor" Click="criterioAutor_Click" />
+                                </ContextMenu>
+                            </ui:DropDownButton.Flyout>
+                        </ui:DropDownButton>
+
+                        <ui:TextBox x:Name="txtSearch" Grid.Column="1" Icon="{ui:SymbolIcon Search24}"
+                                    PlaceholderText="Buscar por título…"
+                                    ClearButtonEnabled="True" TextChanged="txtSearch_TextChanged" />
+                        <ui:Button x:Name="btnRefresh" Grid.Column="2" Margin="8,0,0,0" Padding="10"
+                                   Icon="{ui:SymbolIcon ArrowClockwise24}" ToolTip="Actualizar"
+                                   Click="btnRefresh_Click" />
+                    </Grid>
+
+                    <DataGrid x:Name="dgLibros" Grid.Row="1" Style="{StaticResource ModernGrid}"
+                              SelectionChanged="dgLibros_SelectionChanged"
+                              MouseDoubleClick="dgLibros_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Título" Binding="{Binding Titulo}" Width="3*"
+                                                ElementStyle="{StaticResource TextCell}" />
+                            <DataGridTextColumn Header="ISBN" Binding="{Binding ISBN}" Width="130"
+                                                ElementStyle="{StaticResource TextCell}" />
+                            <DataGridTextColumn Header="Autor" Binding="{Binding NombreAutor}" Width="2*"
+                                                ElementStyle="{StaticResource TextCell}" />
+                            <DataGridTextColumn Header="Ejemplares" Binding="{Binding Ejemplares}" Width="90"
+                                                ElementStyle="{StaticResource NumberCell}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel x:Name="emptyState" Style="{StaticResource EmptyState}">
+                        <ui:SymbolIcon Symbol="BookOpen24" FontSize="42" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="No se encontraron libros" Style="{StaticResource HintText}" Margin="0,10,0,0" />
+                    </StackPanel>
+
+                    <ui:ProgressRing x:Name="loading" Grid.RowSpan="2" Width="44" Height="44"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     Visibility="Collapsed" IsIndeterminate="True" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Formulario de edición -->
+            <ui:Card Grid.Column="2" Padding="16" VerticalAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Datos del libro" Style="{StaticResource SectionTitle}" />
+
+                    <StackPanel Grid.Row="1" Margin="0,8,0,0">
+                        <TextBlock Text="Título" Style="{StaticResource FieldLabel}" />
+                        <ui:TextBox x:Name="txtTitulo" PlaceholderText="Ej. Cien años de soledad" />
+
+                        <TextBlock Text="ISBN" Style="{StaticResource FieldLabel}" />
+                        <ui:TextBox x:Name="txtIsbn" PlaceholderText="Ej. 9780307474728" />
+
+                        <TextBlock Text="Autor" Style="{StaticResource FieldLabel}" />
+                        <ComboBox x:Name="cboAutor" DisplayMemberPath="Nombre" />
+
+                        <TextBlock Text="Ejemplares" Style="{StaticResource FieldLabel}" />
+                        <ui:NumberBox x:Name="numEjemplares" Minimum="0" Maximum="999" SpinButtonPlacementMode="Inline" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                        <ui:Button x:Name="btnGuardar" Appearance="Primary" Content="Registrar"
+                                   Icon="{ui:SymbolIcon Save24}" Click="btnGuardar_Click" />
+                        <ui:Button x:Name="btnNuevo" Margin="0,8,0,0" Content="Nuevo"
+                                   Icon="{ui:SymbolIcon Add24}" Click="btnNuevo_Click" />
+                        <ui:Button x:Name="btnEliminar" Margin="0,8,0,0" Appearance="Danger" Content="Dar de baja"
+                                   Icon="{ui:SymbolIcon Delete24}" Click="btnEliminar_Click" />
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+        </Grid>
+    </Grid>
+</Page>
