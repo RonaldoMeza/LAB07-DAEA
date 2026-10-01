@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Biblioteca.Entidades;
@@ -139,32 +140,49 @@ public partial class PrestamosPage : Page
         emptyPendientes.Visibility = lista.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    // Al elegir un libro pendiente se muestra la multa calculada por la capa de Negocio.
+    // Al elegir uno o varios libros pendientes se muestra la multa total calculada por la capa de Negocio.
     private void dgPendientes_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (dgPendientes.SelectedItem is DetallePendiente detalle)
-            txtMulta.Text = $"S/ {detalle.Multa:0.00}";
+        if (dgPendientes.SelectedItems != null && dgPendientes.SelectedItems.Count > 0)
+        {
+            var seleccion = dgPendientes.SelectedItems.Cast<DetallePendiente>().ToList();
+            var total = seleccion.Sum(d => d.Multa);
+            txtMulta.Text = $"S/ {total:0.00}";
+        }
         else
+        {
             txtMulta.Text = "S/ 0.00";
+        }
     }
 
     private async void btnDevolver_Click(object sender, RoutedEventArgs e)
     {
-        if (dgPendientes.SelectedItem is not DetallePendiente detalle)
+        if (dgPendientes.SelectedItems == null || dgPendientes.SelectedItems.Count == 0)
         {
-            UiServices.ShowWarning("Selecciona el libro que se está devolviendo.");
+            UiServices.ShowWarning("Selecciona al menos un libro que se está devolviendo.");
             return;
         }
 
-        ResultadoDevolucion resultado = null;
-        var ok = await UiServices.RunAsync(async () =>
-            resultado = await _prestamos.RegistrarDevolucionAsync(detalle.PrestamoId, detalle.LibroId),
-            busy => loadingDevolucion.Visibility = busy ? Visibility.Visible : Visibility.Collapsed);
+        var detalles = dgPendientes.SelectedItems.Cast<DetallePendiente>().ToList();
+        decimal multaTotal = 0m;
+        int devoluciones = 0;
 
-        if (ok && resultado != null)
+        var ok = await UiServices.RunAsync(async () =>
         {
-            UiServices.ShowSuccess(
-                $"Devolución registrada. Multa: S/ {resultado.Multa:0.00} ({resultado.DiasRetraso} día(s) de retraso).");
+            foreach (var d in detalles)
+            {
+                var resultado = await _prestamos.RegistrarDevolucionAsync(d.PrestamoId, d.LibroId);
+                if (resultado != null)
+                {
+                    multaTotal += resultado.Multa;
+                    devoluciones++;
+                }
+            }
+        }, busy => loadingDevolucion.Visibility = busy ? Visibility.Visible : Visibility.Collapsed);
+
+        if (ok)
+        {
+            UiServices.ShowSuccess($"Se registraron {devoluciones} devolución(es). Multa total: S/ {multaTotal:0.00}.");
             txtMulta.Text = "S/ 0.00";
             await CargarPendientesAsync();
             await CargarCombosAsync(); // el stock cambió

@@ -127,7 +127,8 @@
                                        Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
 
                             <DataGrid x:Name="dgPendientes" Grid.Row="1" Style="{StaticResource ModernGrid}"
-                                      SelectionChanged="dgPendientes_SelectionChanged">
+                                      SelectionChanged="dgPendientes_SelectionChanged"
+                                      SelectionMode="Extended" SelectionUnit="FullRow">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Libro" Binding="{Binding TituloLibro}" Width="3*"
                                                         ElementStyle="{StaticResource TextCell}" />
@@ -135,7 +136,7 @@
                                                         Width="110" ElementStyle="{StaticResource TextCell}" />
                                     <DataGridTextColumn Header="Días retraso" Binding="{Binding DiasRetraso}" Width="100"
                                                         ElementStyle="{StaticResource NumberCell}" />
-                                    <DataGridTextColumn Header="Multa" Binding="{Binding Multa, StringFormat='S/ '0.00}" Width="90"
+                                    <DataGridTextColumn Header="Multa" Binding="{Binding Multa, StringFormat='S/ {0:0.00}'}" Width="90"
                                                         ElementStyle="{StaticResource NumberCell}" />
                                 </DataGrid.Columns>
                             </DataGrid>

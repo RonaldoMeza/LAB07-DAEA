@@ -64,8 +64,10 @@ public class LibroRepositorio
     // Se excluye el propio registro para que, al editar, no choque consigo mismo.
     public async Task<bool> ExisteIsbnAsync(string isbn, int excluirLibroId)
     {
+        // Solo considerar libros activos: un libro dado de baja (Activo = 0)
+        // no debe impedir volver a usar el mismo ISBN.
         const string sql = @"SELECT COUNT(1) FROM Libros
-                             WHERE ISBN = @ISBN AND LibroId <> @Id";
+                             WHERE ISBN = @ISBN AND LibroId <> @Id AND Activo = 1";
 
         using var cn = DbConnectionFactory.Create();
         using var cmd = new SqlCommand(sql, cn);
